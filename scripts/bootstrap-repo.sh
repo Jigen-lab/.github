@@ -276,6 +276,28 @@ else
   fi
 fi
 
+# ---------- 5b. Allow GitHub Actions to create and approve PRs ----------
+# Default GitHub setting blocks Actions from opening PRs (anti-tokensteal).
+# The AI Claude reusable workflow auto-opens fix PRs after Claude pushes,
+# so we need this enabled. Org-level write permission must already be on
+# (Settings → Actions → General → Workflow permissions); per-repo PUT
+# refines it. If the org default is "read", this PUT returns 409 — fix at
+# org level first, then re-run.
+step "Enabling Actions create-PR permission"
+if [[ "$DRY_RUN" == "true" ]]; then
+  log "[dry-run] gh api -X PUT 'repos/${ORG}/${REPO_NAME}/actions/permissions/workflow' -F default_workflow_permissions=write -F can_approve_pull_request_reviews=true"
+else
+  if gh api -X PUT "repos/${ORG}/${REPO_NAME}/actions/permissions/workflow" \
+      -F default_workflow_permissions=write \
+      -F can_approve_pull_request_reviews=true >/dev/null 2>&1; then
+    log "create-PR permission enabled"
+  else
+    log "WARN: failed to enable create-PR permission (org-level may be 'read')"
+    log "      Fix at org level: Settings → Actions → General → Workflow permissions → Read and write"
+    log "      Then retry: gh api -X PUT 'repos/${ORG}/${REPO_NAME}/actions/permissions/workflow' -F default_workflow_permissions=write -F can_approve_pull_request_reviews=true"
+  fi
+fi
+
 # ---------- 6. Apply standard labels (delegates to sync-labels.sh) ----------
 step "Applying standard labels (via sync-labels.sh)"
 SYNC_FLAGS="--repo ${REPO_NAME} --delete-extra"

@@ -1,0 +1,20 @@
+name: AI Closure Summary
+
+# Stage 5 of the AI workflow: when an issue closes as completed, post a
+# structured closure comment via the shared reusable in
+# Jigen-lab/github-workflows. See:
+#   https://github.com/Jigen-lab/playbook/blob/main/workflows/ai-assisted-development.md
+#
+# Requires the org-level secret CLAUDE_OAUTH_TOKEN to be granted to this
+# repo (visibility: selected). Without it, the closure step errors out
+# harmlessly — no impact on the merge itself.
+
+on:
+  issues:
+    types: [closed]
+
+jobs:
+  summarize:
+    if: github.event.issue.state_reason == 'completed'
+    uses: Jigen-lab/github-workflows/.github/workflows/ai-closure-summary.yml@main
+    secrets: inherit

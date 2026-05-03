@@ -227,26 +227,12 @@ step "Enabling Private Vulnerability Reporting"
 run "gh api -X PUT 'repos/${ORG}/${REPO_NAME}/private-vulnerability-reporting' >/dev/null"
 log "PVR enabled"
 
-# ---------- 6. Apply standard labels ----------
-step "Applying standard labels from labels.json"
-if [[ "$DRY_RUN" == "true" ]]; then
-  log "[dry-run] would create $(jq length "$LABELS_FILE") labels"
-else
-  # Delete GitHub default labels first (bug, documentation, etc) — we replace them with our own
-  for default_label in bug documentation duplicate enhancement "good first issue" "help wanted" invalid question wontfix; do
-    gh api -X DELETE "repos/${ORG}/${REPO_NAME}/labels/${default_label// /%20}" 2>/dev/null || true
-  done
-
-  jq -c '.[]' "$LABELS_FILE" | while read -r label; do
-    name=$(echo "$label" | jq -r .name)
-    color=$(echo "$label" | jq -r .color)
-    desc=$(echo "$label" | jq -r .description)
-    gh api -X POST "repos/${ORG}/${REPO_NAME}/labels" \
-      -f name="$name" -f color="$color" -f description="$desc" >/dev/null \
-      && log "+ $name" \
-      || log "  (skipped, already exists: $name)"
-  done
-fi
+# ---------- 6. Apply standard labels (delegates to sync-labels.sh) ----------
+step "Applying standard labels (via sync-labels.sh)"
+SYNC_FLAGS="--repo ${REPO_NAME} --delete-extra"
+[[ "$DRY_RUN" == "true" ]] && SYNC_FLAGS="${SYNC_FLAGS} --dry-run"
+# Auto-confirm the sync prompt
+echo "y" | "${SCRIPT_DIR}/sync-labels.sh" ${SYNC_FLAGS} | sed 's/^/    /'
 
 # ---------- Done ----------
 echo ""

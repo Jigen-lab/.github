@@ -1,10 +1,37 @@
 # scripts/
 
-Helper scripts for the Jigen GitHub organization.
+Helper scripts and configuration for the Jigen GitHub organization.
+
+## Issue Types vs Labels — division of concerns
+
+We use **both**, but for different purposes:
+
+| | Issue Types | Labels |
+|---|---|---|
+| **Scope** | Org-wide (one set, applies to all repos) | Per-repo (synced via `sync-labels.sh`) |
+| **Cardinality** | Exactly **1** per issue | Many per issue |
+| **Question they answer** | "What kind of work is this?" | "What attributes does it have?" |
+| **Examples** | Bug, Feature, Task, Improvement, Documentation | priority, status, area, impact |
+
+Configured Issue Types (managed in GitHub UI / API at the org level):
+- **Bug** — unexpected problem or behavior
+- **Feature** — request, idea, or new functionality
+- **Task** — specific piece of work
+- **Improvement** — enhancement to existing functionality
+- **Documentation** — docs work
+
+Configured label namespaces (in `labels.json`):
+- `priority: P0/P1/P2/P3` — severity
+- `status: needs-triage/blocked/in-progress/ready/needs-info/wontfix/duplicate/invalid` — workflow state
+- `area: backend/frontend/infra/ci/dependencies/security` — codebase area
+- `impact: breaking/performance` — special impact warnings
+- Generic: `good first issue`, `help wanted`, `question`
+
+---
 
 ## bootstrap-repo.sh
 
-Creates a new repository under `Jigen-lab` with sensible defaults: scaffolds README/LICENSE/.gitignore/dependabot, grants team access, enables Private Vulnerability Reporting, and applies the standard label set.
+Creates a new repository under `Jigen-lab` with sensible defaults.
 
 ### Prerequisites
 
@@ -27,7 +54,7 @@ Creates a new repository under `Jigen-lab` with sensible defaults: scaffolds REA
 # Multi-language monorepo
 ./scripts/bootstrap-repo.sh platform --lang mix --description "Main platform monorepo"
 
-# Preview what would happen, change nothing
+# Preview, change nothing
 ./scripts/bootstrap-repo.sh demo --lang ts --dry-run
 ```
 
@@ -47,25 +74,54 @@ Creates a new repository under `Jigen-lab` with sensible defaults: scaffolds REA
 3. Initial GPG-signed commit and push to `main`
 4. Grants `@Jigen-lab/engineering` write access, `@Jigen-lab/security` read access
 5. Enables Private Vulnerability Reporting
-6. Removes GitHub default labels and applies the set from `labels.json`
+6. Calls `sync-labels.sh` to apply the standard label set
 
-### What it does NOT do (already org-wide)
+---
 
-- 2FA enforcement, default permissions, Dependabot/secret scanning defaults — applied at org level
-- Branch ruleset (signed commits, PR required, no force push) — applied at org level via `default-branch-protection`
-- Allowed Actions whitelist — applied at org level
+## sync-labels.sh
+
+Idempotent label synchronization across one or all repos.
+
+### Usage
+
+```bash
+# Sync labels.json to ALL repos
+./scripts/sync-labels.sh --all
+
+# Sync to specific repo(s)
+./scripts/sync-labels.sh --repo api --repo web
+
+# Also delete labels NOT in labels.json (cleanup mode)
+./scripts/sync-labels.sh --all --delete-extra
+
+# Preview changes — no modifications
+./scripts/sync-labels.sh --all --dry-run
+```
+
+### Behavior (idempotent)
+
+- Label in `labels.json`, NOT in repo → **CREATE**
+- Label in `labels.json`, in repo, color/description differ → **UPDATE**
+- Label in `labels.json`, in repo, identical → skip
+- Label in repo, NOT in `labels.json` → kept (use `--delete-extra` to remove)
+
+Run after editing `labels.json` to roll out changes everywhere:
+```bash
+./scripts/sync-labels.sh --all --delete-extra
+```
+
+---
 
 ## labels.json
 
-The standard label set applied to every new repo. Edit here, then re-run on existing repos to sync.
+The single source of truth for labels across all repos.
 
-Categories:
-- `type:` — what kind of work (bug, feature, docs, chore, refactor, test, security, breaking)
-- `priority:` — P0 (critical) → P3 (cosmetic)
-- `status:` — needs-triage, blocked, in-progress, ready, needs-info
-- `area:` — backend, frontend, infra, ci, dependencies
-- Generic: good first issue, help wanted, duplicate, wontfix, invalid, question
+To add/edit a label, modify this file then run `sync-labels.sh --all --delete-extra`.
+
+GitHub default labels (`bug`, `enhancement`, `wontfix`, etc.) are intentionally NOT in `labels.json` because they're replaced by our `status: *` and Issue Types. They get removed by `--delete-extra`.
+
+---
 
 ## dependabot-templates/
 
-One YAML file per supported language. Used by `bootstrap-repo.sh` and as a reference if you need to manually add a dependabot config to an existing repo.
+One YAML file per supported language. Used by `bootstrap-repo.sh` and as a manual reference.

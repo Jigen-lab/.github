@@ -174,11 +174,12 @@ mkdir -p .github
 cp "${TEMPLATES_DIR}/${LANG}.yml" .github/dependabot.yml
 log ".github/dependabot.yml (${LANG} template)"
 
-# LICENSE — MIT default; replace if needed
-cat > LICENSE <<EOF
+# LICENSE — proprietary by default (private repos), MIT only if --public
+if [[ "$VISIBILITY" == "public" ]]; then
+  cat > LICENSE <<EOF
 MIT License
 
-Copyright (c) $(date +%Y) Jigen
+Copyright (c) $(date +%Y) Jigen SAGL
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -198,7 +199,36 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 EOF
-log "LICENSE (MIT)"
+  log "LICENSE (MIT — public repo)"
+else
+  cat > LICENSE <<EOF
+PROPRIETARY AND CONFIDENTIAL
+
+Copyright (c) $(date +%Y) Jigen SAGL. All rights reserved.
+
+This source code and all associated files (the "Software") are the
+proprietary and confidential property of Jigen SAGL. Possession or use of
+this Software does not convey any rights to reproduce, disclose its
+contents, manufacture, use, or sell anything that it may describe, in
+whole or in part, without the specific prior written permission of
+Jigen SAGL.
+
+Unauthorized copying, distribution, modification, public display, public
+performance, or use of this Software, via any medium, is strictly
+prohibited and may result in civil and criminal penalties under applicable
+law.
+
+This Software is provided "AS IS", without warranty of any kind, express
+or implied, including but not limited to the warranties of merchantability,
+fitness for a particular purpose, and noninfringement. In no event shall
+Jigen SAGL be liable for any claim, damages, or other liability, whether
+in an action of contract, tort, or otherwise, arising from, out of, or in
+connection with the Software or the use or other dealings in the Software.
+
+For licensing inquiries, contact: legal@jigen.example
+EOF
+  log "LICENSE (Proprietary — Jigen SAGL)"
+fi
 
 # ---------- 3. Initial commit + push ----------
 step "Initial commit and push"

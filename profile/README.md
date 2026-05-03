@@ -13,7 +13,7 @@ Our active projects are listed below. Most repositories are private; reach out i
 ## Get in touch
 
 - Website: _coming soon_
-- Email: hello@jigen.example
+- Email: hello@jigen.ch
 
 ## Security
 

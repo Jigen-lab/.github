@@ -9,7 +9,7 @@ We take the security of our software seriously. If you believe you have found a 
 ### How to report
 
 - **Preferred**: Use [GitHub Private Vulnerability Reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability) on the affected repository (Security tab → Report a vulnerability).
-- **Alternative**: Email `security@jigen.example` (replace with your real address).
+- **Alternative**: Email `security@jigen.ch`.
 
 ### What to include
 

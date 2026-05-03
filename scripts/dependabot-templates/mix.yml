@@ -1,0 +1,37 @@
+version: 2
+# Multi-language repo template — uncomment the ecosystems actually used.
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci"
+    labels: ["area: dependencies", "area: ci"]
+
+  # - package-ecosystem: "npm"
+  #   directory: "/"
+  #   schedule: { interval: "weekly", day: "monday" }
+  #   open-pull-requests-limit: 10
+  #   labels: ["area: dependencies"]
+
+  # - package-ecosystem: "pip"
+  #   directory: "/"
+  #   schedule: { interval: "weekly", day: "monday" }
+  #   open-pull-requests-limit: 10
+  #   labels: ["area: dependencies"]
+
+  # - package-ecosystem: "nuget"
+  #   directory: "/"
+  #   schedule: { interval: "weekly", day: "monday" }
+  #   open-pull-requests-limit: 10
+  #   labels: ["area: dependencies"]
+
+  # - package-ecosystem: "docker"
+  #   directory: "/"
+  #   schedule: { interval: "weekly", day: "monday" }
+  #   labels: ["area: dependencies"]

@@ -1,0 +1,35 @@
+[
+  {"name": "type: bug",            "color": "d73a4a", "description": "Something is not working"},
+  {"name": "type: feature",        "color": "a2eeef", "description": "New feature or request"},
+  {"name": "type: enhancement",    "color": "84b6eb", "description": "Improvement to existing functionality"},
+  {"name": "type: docs",           "color": "0075ca", "description": "Documentation only"},
+  {"name": "type: chore",          "color": "cccccc", "description": "Maintenance work"},
+  {"name": "type: refactor",       "color": "9c5bc1", "description": "Code refactor with no behavior change"},
+  {"name": "type: test",           "color": "bfd4f2", "description": "Tests added or modified"},
+  {"name": "type: security",       "color": "5319e7", "description": "Security-related"},
+  {"name": "type: breaking",       "color": "b60205", "description": "Backwards-incompatible change"},
+
+  {"name": "priority: P0",         "color": "b60205", "description": "Critical — production down or data loss"},
+  {"name": "priority: P1",         "color": "d93f0b", "description": "High — major feature broken"},
+  {"name": "priority: P2",         "color": "fbca04", "description": "Medium — has workaround"},
+  {"name": "priority: P3",         "color": "c2e0c6", "description": "Low — minor or cosmetic"},
+
+  {"name": "status: needs-triage", "color": "ededed", "description": "Awaiting triage"},
+  {"name": "status: blocked",      "color": "b60205", "description": "Blocked by external dependency"},
+  {"name": "status: in-progress",  "color": "fbca04", "description": "Actively being worked on"},
+  {"name": "status: ready",        "color": "0e8a16", "description": "Ready for review or merge"},
+  {"name": "status: needs-info",   "color": "d4c5f9", "description": "Waiting on additional information"},
+
+  {"name": "area: backend",        "color": "1d76db", "description": "Backend / API"},
+  {"name": "area: frontend",       "color": "5319e7", "description": "Frontend / UI"},
+  {"name": "area: infra",          "color": "0e8a16", "description": "Infrastructure / DevOps"},
+  {"name": "area: ci",             "color": "ededed", "description": "CI / CD"},
+  {"name": "area: dependencies",   "color": "0366d6", "description": "Dependency updates"},
+
+  {"name": "good first issue",     "color": "7057ff", "description": "Good for newcomers"},
+  {"name": "help wanted",          "color": "008672", "description": "Extra attention is needed"},
+  {"name": "duplicate",            "color": "cfd3d7", "description": "Already exists"},
+  {"name": "wontfix",              "color": "ffffff", "description": "Will not be worked on"},
+  {"name": "invalid",              "color": "e4e669", "description": "Not valid"},
+  {"name": "question",             "color": "d876e3", "description": "Question — not a bug or feature"}
+]

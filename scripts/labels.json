@@ -25,5 +25,11 @@
 
   {"name": "good first issue",     "color": "7057ff", "description": "Good for newcomers"},
   {"name": "help wanted",          "color": "008672", "description": "Extra attention is needed"},
-  {"name": "question",             "color": "d876e3", "description": "Open question or discussion"}
+  {"name": "question",             "color": "d876e3", "description": "Open question or discussion"},
+
+  {"name": "ai-fix",               "color": "1f6feb", "description": "Eligible for automated fix attempt by AI agent"},
+  {"name": "ai-fix: done",         "color": "0e8a16", "description": "Fix completed and merged via AI workflow"},
+  {"name": "ai-fix: rejected",     "color": "d93f0b", "description": "AI fix attempted but rejected — needs human"},
+  {"name": "ai-fix: rollback",     "color": "b60205", "description": "Merged AI fix caused regression — reverted"},
+  {"name": "ai-no-fix",            "color": "6e7781", "description": "Explicitly NOT eligible for AI fix"}
 ]

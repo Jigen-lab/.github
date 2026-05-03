@@ -222,10 +222,18 @@ if [[ "$GRANT_TEAMS" == "true" ]]; then
   log "security → read"
 fi
 
-# ---------- 5. Enable Private Vulnerability Reporting ----------
+# ---------- 5. Enable Private Vulnerability Reporting (non-fatal) ----------
 step "Enabling Private Vulnerability Reporting"
-run "gh api -X PUT 'repos/${ORG}/${REPO_NAME}/private-vulnerability-reporting' >/dev/null"
-log "PVR enabled"
+if [[ "$DRY_RUN" == "true" ]]; then
+  log "[dry-run] gh api -X PUT 'repos/${ORG}/${REPO_NAME}/private-vulnerability-reporting'"
+else
+  if gh api -X PUT "repos/${ORG}/${REPO_NAME}/private-vulnerability-reporting" >/dev/null 2>&1; then
+    log "PVR enabled"
+  else
+    log "WARN: PVR enable failed (may need manual retry — newly-created private repos sometimes 404)"
+    log "      Retry with: gh api -X PUT 'repos/${ORG}/${REPO_NAME}/private-vulnerability-reporting'"
+  fi
+fi
 
 # ---------- 6. Apply standard labels (delegates to sync-labels.sh) ----------
 step "Applying standard labels (via sync-labels.sh)"

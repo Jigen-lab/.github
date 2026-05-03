@@ -1,0 +1,41 @@
+# Default Dependabot config — copy into individual repos as needed.
+# Note: This file in the .github repo is NOT auto-applied to other repos
+# (Dependabot config is per-repo). Use this as a starting template.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci"
+    labels: ["dependencies", "github-actions"]
+
+  # Uncomment the ecosystem(s) used in the target repo:
+  #
+  # - package-ecosystem: "npm"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #   open-pull-requests-limit: 10
+  #   groups:
+  #     dev-dependencies:
+  #       dependency-type: "development"
+  #     prod-minor-and-patch:
+  #       dependency-type: "production"
+  #       update-types: ["minor", "patch"]
+  #   labels: ["dependencies"]
+  #
+  # - package-ecosystem: "pip"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #
+  # - package-ecosystem: "docker"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"

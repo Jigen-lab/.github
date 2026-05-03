@@ -1,0 +1,20 @@
+# CODEOWNERS — default fallback for any repo without its own CODEOWNERS file.
+#
+# Syntax: <pattern> <owner1> <owner2>
+# Owners listed here are auto-requested as reviewers when a PR touches matching files.
+# More specific patterns override less specific ones; the LAST matching line wins.
+
+# Default owner for everything
+*                      @Jigen-lab/engineering
+
+# Security-sensitive paths require security team review
+/SECURITY.md           @Jigen-lab/security
+/.github/              @Jigen-lab/security @Jigen-lab/engineering
+**/security/           @Jigen-lab/security
+**/auth/               @Jigen-lab/security
+**/Dockerfile*         @Jigen-lab/security
+**/*.tf                @Jigen-lab/security
+**/*.tfvars            @Jigen-lab/security
+
+# CI/CD changes
+/.github/workflows/    @Jigen-lab/engineering @Jigen-lab/security

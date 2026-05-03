@@ -24,3 +24,13 @@ For most files, GitHub looks for them in this priority order:
 2. This `.github` repo (org-wide fallback)
 
 `CODEOWNERS` and `dependabot.yml` are **per-repo only** — the versions here are reference templates.
+
+## Creating a new repo
+
+Use the bootstrap script — it handles repo creation, team access, labels, dependabot, and Private Vulnerability Reporting in one go:
+
+```bash
+./scripts/bootstrap-repo.sh <name> --lang <ts|py|cs|mix>
+```
+
+See [`scripts/README.md`](./scripts/README.md) for full documentation.

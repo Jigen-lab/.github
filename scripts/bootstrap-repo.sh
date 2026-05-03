@@ -21,6 +21,7 @@
 #       - README.md (skeleton)
 #       - .gitignore (downloaded from github/gitignore for the chosen language)
 #       - .github/dependabot.yml (from scripts/dependabot-templates/)
+#       - .github/workflows/ai-closure-summary.yml (from scripts/workflow-templates/)
 #       - LICENSE (MIT — change in template if needed)
 #   5. Creates standard labels from scripts/labels.json
 #
@@ -41,6 +42,7 @@ DRY_RUN="false"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATES_DIR="${SCRIPT_DIR}/dependabot-templates"
+WORKFLOW_TEMPLATES_DIR="${SCRIPT_DIR}/workflow-templates"
 LABELS_FILE="${SCRIPT_DIR}/labels.json"
 
 # ---------- Helpers ----------
@@ -174,6 +176,14 @@ mkdir -p .github
 cp "${TEMPLATES_DIR}/${LANG}.yml" .github/dependabot.yml
 log ".github/dependabot.yml (${LANG} template)"
 
+# .github/workflows/ai-closure-summary.yml — Stage 5 of the AI workflow.
+# Copied unconditionally; the action step itself only runs when an issue
+# closes as "completed" AND the org-level CLAUDE_OAUTH_TOKEN secret is
+# granted to this repo. Without the secret, the run errors out harmlessly.
+mkdir -p .github/workflows
+cp "${WORKFLOW_TEMPLATES_DIR}/ai-closure-summary.yml" .github/workflows/ai-closure-summary.yml
+log ".github/workflows/ai-closure-summary.yml (AI Stage 5)"
+
 # LICENSE — proprietary by default (private repos), MIT only if --public
 if [[ "$VISIBILITY" == "public" ]]; then
   cat > LICENSE <<EOF
@@ -240,7 +250,8 @@ run "git commit -S -m 'chore: bootstrap repository
 Initial scaffold via scripts/bootstrap-repo.sh:
 - README, LICENSE (MIT)
 - .gitignore (${LANG})
-- .github/dependabot.yml (${LANG} template)' >/dev/null"
+- .github/dependabot.yml (${LANG} template)
+- .github/workflows/ai-closure-summary.yml (AI Stage 5)' >/dev/null"
 run "git push -u origin main"
 
 # ---------- 4. Grant team access ----------

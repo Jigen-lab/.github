@@ -1,7 +1,7 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="profile/assets/wordmark-dark.svg">
-    <img src="profile/assets/wordmark-light.svg" alt="JIGEN." width="240">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/wordmark-dark.svg">
+    <img src="assets/wordmark-light.svg" alt="JIGEN." width="240">
   </picture>
 
   <p><strong>Precision aesthetic, applied to Artificial Intelligence.</strong></p>

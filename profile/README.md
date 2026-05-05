@@ -4,35 +4,35 @@
     <img src="profile/assets/wordmark-light.svg" alt="JIGEN." width="240">
   </picture>
 
-  <p><strong>L'estetica della precisione applicata all'Intelligenza Artificiale.</strong></p>
+  <p><strong>Precision aesthetic, applied to Artificial Intelligence.</strong></p>
 
   <p><sub>Swiss Sagl · Established 2026</sub></p>
 </div>
 
 ---
 
-## Cosa facciamo
+## What we do
 
-Non vendiamo software. Sviluppiamo automazioni per annullare l'attrito dei processi interni e progettiamo agenti marketing autonomi per scalare le vendite. Sistemi in produzione in **21 giorni**, strutturati unicamente per massimizzare il margine netto del cliente.
+We don't sell software. We engineer automations that eliminate internal-process friction and design autonomous marketing agents that scale sales. Systems shipped to production in **21 days**, engineered for one purpose: maximizing the client's net margin.
 
-Lavoriamo come una **syndicate tecnologica**: pochi senior architect, affiancati da agenti AI proprietari che fanno da moltiplicatori di forza. Niente bloatware, niente vanity metrics — solo Revenue, margine, riduzione costi reali.
+We operate as a **tech syndicate**: a small bench of senior architects backed by proprietary AI agents acting as force multipliers. No bloatware, no vanity metrics — just Revenue, margin, real cost reduction.
 
-## Cosa pubblichiamo
+## What we publish
 
-La maggior parte dei repo è **privata**. Quelli accessibili da qui sono il sottoinsieme che condividiamo con la community:
+Most repos are **private**. The ones surfaced below are the subset we share with the community:
 
-- **[`.github`](https://github.com/Jigen-lab/.github)** — questo profilo, contributing & security policy
-- **[`playbook`](https://github.com/Jigen-lab/playbook)** — convenzioni di engineering, workflow, decisioni
+- **[`.github`](https://github.com/Jigen-lab/.github)** — this profile, contributing & security policy
+- **[`playbook`](https://github.com/Jigen-lab/playbook)** — engineering conventions, workflows, decisions
 - **[`ai-tools-marketplace`](https://github.com/Jigen-lab/ai-tools-marketplace)** — Claude Code plugins, agents, skills
 
-Per accesso ai progetti interni o partnership tecniche, scrivere a `hello@jigen.ch`.
+For access to internal projects or technical partnerships, reach out at `hello@jigen.ch`.
 
-## Contattaci
+## Get in touch
 
-- Web: [jigen.ch](https://jigen.ch) <sub>(presto online)</sub>
+- Web: [jigen.ch](https://jigen.ch) <sub>(coming soon)</sub>
 - Email: [hello@jigen.ch](mailto:hello@jigen.ch)
-- Sede: Via Arboi 25, 6534 S. Vittore (GR), Svizzera
+- HQ: Via Arboi 25, 6534 S. Vittore (GR), Switzerland
 
 ## Security
 
-Hai trovato una vulnerabilità? Leggi prima la [SECURITY.md](https://github.com/Jigen-lab/.github/blob/main/SECURITY.md). Non aprire issue pubbliche per problemi di sicurezza.
+Found a security issue? Read [SECURITY.md](https://github.com/Jigen-lab/.github/blob/main/SECURITY.md) first. Do not open public issues for security problems.

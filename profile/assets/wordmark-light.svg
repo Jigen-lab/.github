@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 110" role="img" aria-labelledby="t d">
+  <title id="t">Jigen — wordmark</title>
+  <desc id="d">JIGEN with oversized red accent period — light bg</desc>
+  <text x="20" y="78" font-family="Inter, system-ui, -apple-system, sans-serif"
+        font-weight="800" font-size="72" letter-spacing="-2.5" fill="#111111">JIGEN</text>
+  <circle cx="262" cy="74" r="13" fill="#FF2A54"/>
+</svg>

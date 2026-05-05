@@ -1,4 +1,4 @@
-# Claude Code instructions for dotgithub-repo
+# Claude Code instructions for the org `.github` repo (formerly dotgithub-repo)
 
 This is the **org-tooling repo** for `Jigen-lab` — bootstrap scripts, label catalog, ruleset config, and shared workflow / dependabot templates that get installed into every new Jigen-lab repository. Read this file before doing any work here.
 

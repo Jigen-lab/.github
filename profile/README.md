@@ -15,17 +15,9 @@
 
 We do crazy, disruptive stuff with AI. 🚀
 
-## What we publish
-
-Most repos are **private**. The ones surfaced below are the subset we share with the community:
-
-- **[`.github`](https://github.com/Jigen-lab/.github)** — this profile, contributing & security policy
-- **[`playbook`](https://github.com/Jigen-lab/playbook)** — engineering conventions, workflows, decisions
-- **[`ai-tools-marketplace`](https://github.com/Jigen-lab/ai-tools-marketplace)** — Claude Code plugins, agents, skills
-
-For access to internal projects or technical partnerships, get in touch through GitHub.
-
 ## Get in touch
+
+Most of our codebase is private by design — we ship results, not gallery pieces. For technical partnerships, contributor access, or commercial inquiries:
 
 - HQ: Via Arboi 25, 6534 S. Vittore (GR), Switzerland
 

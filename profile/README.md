@@ -17,17 +17,9 @@ We don't sell software. We engineer automations that eliminate internal-process 
 
 We operate as a **tech syndicate**: a small bench of senior architects backed by proprietary AI agents acting as force multipliers. No bloatware, no vanity metrics — just Revenue, margin, real cost reduction.
 
-## What we publish
-
-Most repos are **private**. The ones surfaced below are the subset we share with the community:
-
-- **[`.github`](https://github.com/Jigen-lab/.github)** — this profile, contributing & security policy
-- **[`playbook`](https://github.com/Jigen-lab/playbook)** — engineering conventions, workflows, decisions
-- **[`ai-tools-marketplace`](https://github.com/Jigen-lab/ai-tools-marketplace)** — Claude Code plugins, agents, skills
-
-For access to internal projects or technical partnerships, reach out at `hello@jigen.ch`.
-
 ## Get in touch
+
+Most of our codebase is private by design — we ship results, not gallery pieces. For technical partnerships, contributor access, or commercial inquiries:
 
 - Web: [jigen.ch](https://jigen.ch) <sub>(coming soon)</sub>
 - Email: [hello@jigen.ch](mailto:hello@jigen.ch)

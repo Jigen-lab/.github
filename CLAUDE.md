@@ -11,27 +11,28 @@ This is the **org-tooling repo** for `Jigen-lab` — bootstrap scripts, label ca
 ## Layout
 
 ```
-scripts/
-  bootstrap-repo.sh            creates a new Jigen-lab repo with sensible defaults
+bootstrap-repo.sh              creates a new Jigen-lab repo with sensible defaults
                                 (visibility, teams, labels, dependabot, AI Stage 5 workflow,
                                  PVR, Actions create-PR permission)
-  bootstrap-claude-code.sh     sets up Claude Code on a developer laptop following
-                                playbook/tooling/claude-code-setup.md (placeholders +
-                                settings.json merge + status line + CLAUDE.md baseline +
-                                marketplaces + plugin baseline + Context7 MCP)
-  sync-labels.sh               reconciles existing repos against labels.json
-  labels.json                  org-canonical label catalog (28 entries:
+sync-labels.sh                 reconciles existing repos against labels.json
+labels.json                    org-canonical label catalog (28 entries:
                                 priority/status/area/impact + generics)
-  workflow-templates/          YAML templates copied into new repos
-                                (currently: ai-closure-summary.yml)
-  dependabot-templates/        dependabot.yml templates per language
-                                (python, ts, dotnet, go, rust)
 ruleset.json                   reference for the org default-branch ruleset
                                 (NOT applied by any script — paste-into-UI)
+workflow-templates/            YAML templates copied into new repos
+                                (currently: ai-closure-summary.yml)
+dependabot-templates/          dependabot.yml templates per language
+                                (python, ts, dotnet, go, rust)
 README.md                      top-level overview
-scripts/README.md              full reference for all scripts and the issue-types
+scripts/README.md              full reference for both scripts and the issue-types
                                 vs labels model
 ```
+
+Note: scripts that pair 1:1 with a prose doc live alongside their doc in the
+private `Jigen-lab/playbook` repo (e.g. `bootstrap-claude-code.sh` lives at
+`playbook/tooling/scripts/`, next to `playbook/tooling/claude-code-setup.md`).
+This repo is public, so scripts referencing private internal infrastructure
+don't belong here.
 
 ## bootstrap-repo.sh
 

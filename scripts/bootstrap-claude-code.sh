@@ -427,7 +427,7 @@ If you are uncertain about any fact, statistic, date, quote, or piece of informa
 
 ## Planning
 
-Always plan before implementing. When the task involves multi-file refactoring, infrastructure changes, or architecture decisions, present 2-3 options before acting, then wait for explicit approval before making code changes. "I think this would be better" is not permission to change something — describe exactly what you're about to change and why, and wait for confirmation.
+Always plan before implementing. When the task involves multi-file refactoring, infrastructure changes, architecture decisions, or any significant alteration of content I've already created (code, docs, copy), present 2-3 options before acting, then wait for explicit approval before making changes. "I think this would be better" is not permission to change something — describe exactly what you're about to change and why, and wait for confirmation.
 
 ## Scope discipline
 

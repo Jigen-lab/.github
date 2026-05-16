@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 110" role="img" aria-labelledby="t d">
+  <title id="t">Jigen — wordmark with kanji (dark)</title>
+  <desc id="d">JIGEN. with kanji 次元 — dark bg</desc>
+  <text x="20" y="78" font-family="Inter, system-ui, -apple-system, sans-serif"
+        font-weight="800" font-size="72" letter-spacing="-2.5" fill="#F4ECD8">JIGEN</text>
+  <circle cx="262" cy="74" r="9" fill="#FF2A54"/>
+  <text x="296" y="78" font-family="'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', system-ui, sans-serif"
+        font-weight="400" font-size="56" fill="#F4ECD8" opacity="0.6">次元</text>
+</svg>

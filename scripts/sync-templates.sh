@@ -95,15 +95,22 @@ done
 # ---------- Discover repos ----------
 if [[ "$SYNC_ALL" == "true" ]]; then
   step "Listing active (non-archived) repos in ${ORG}"
-  mapfile -t REPOS < <(gh api --paginate "orgs/${ORG}/repos" \
+  # macOS ships bash 3.2, which has no `mapfile` — read into the array by hand
+  # so the script runs from any laptop (the repo's portability contract).
+  REPOS=()
+  while IFS= read -r _name; do
+    [[ -n "$_name" ]] && REPOS+=("$_name")
+  done < <(gh api --paginate "orgs/${ORG}/repos" \
     --jq '.[] | select(.archived==false) | .name' | grep -vxF '.github')
   log "Found ${#REPOS[@]} repos (excluding the .github source repo)"
 fi
 
-# Defensive: drop the source repo if it was passed explicitly.
+# Defensive: drop the source repo if it was passed explicitly. The
+# "${arr[@]+"${arr[@]}"}" form is the bash-3.2-safe way to expand a possibly
+# empty array under `set -u` (a bare "${arr[@]}" trips "unbound variable").
 FILTERED=()
-for r in "${REPOS[@]}"; do [[ "$r" == ".github" ]] || FILTERED+=("$r"); done
-REPOS=("${FILTERED[@]}")
+for r in "${REPOS[@]+"${REPOS[@]}"}"; do [[ "$r" == ".github" ]] || FILTERED+=("$r"); done
+REPOS=("${FILTERED[@]+"${FILTERED[@]}"}")
 [[ ${#REPOS[@]} -eq 0 ]] && die "No target repos after filtering"
 
 # ---------- Codex coverage report ----------

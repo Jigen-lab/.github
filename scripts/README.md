@@ -70,11 +70,18 @@ Creates a new repository under `Jigen-lab` with sensible defaults.
 ### What it does
 
 1. Creates `Jigen-lab/<name>` (private by default)
-2. Scaffolds: `README.md`, `LICENSE` (MIT), `.gitignore`, `.github/dependabot.yml`
+2. Scaffolds: `README.md`, `LICENSE` (MIT), `.gitignore`, `.github/dependabot.yml`,
+   `.github/workflows/ai-closure-summary.yml`, and the issue/PR templates
+   (`.github/ISSUE_TEMPLATE/{bug_report,feature_request,config}.yml` +
+   `.github/PULL_REQUEST_TEMPLATE.md`, copied from this repo's own `.github/`)
 3. Initial GPG-signed commit and push to `main`
 4. Grants `@Jigen-lab/engineering` write access, `@Jigen-lab/security` read access
 5. Enables Private Vulnerability Reporting
 6. Calls `sync-labels.sh` to apply the standard label set
+
+> The issue/PR templates are **not** duplicated under `scripts/` — `bootstrap-repo.sh`
+> reads them straight from `../.github/`, the same source of truth `sync-templates.sh`
+> rolls out to existing repos. One copy, no drift.
 
 ---
 
@@ -109,6 +116,66 @@ Run after editing `labels.json` to roll out changes everywhere:
 ```bash
 ./scripts/sync-labels.sh --all --delete-extra
 ```
+
+---
+
+## sync-templates.sh
+
+Rolls the org issue/PR templates out to **existing** repos by opening a pull
+request on each one. The complement to `bootstrap-repo.sh` (which installs the
+same templates at creation time).
+
+### Usage
+
+```bash
+# Open template PRs on every active org repo
+./scripts/sync-templates.sh --all
+
+# Target specific repo(s)
+./scripts/sync-templates.sh --repo api --repo web
+
+# Preview — open nothing
+./scripts/sync-templates.sh --all --dry-run
+
+# Only print the Codex coverage report (no PRs)
+./scripts/sync-templates.sh --all --check-codex
+```
+
+### Behavior (idempotent)
+
+- The `.github` repo itself is skipped — it's the source of truth.
+- Per repo, each template's local blob SHA (`git hash-object`) is compared to
+  the file on the repo's default branch:
+  - all four identical → **up to date, no PR**
+  - any missing / different → opens a `chore/sync-issue-pr-templates` branch
+    and a PR (refreshes the files if that branch / PR already exists)
+- Commits are created through the GitHub Contents API, so they're signed by
+  GitHub's web-flow key and satisfy the org signed-commits ruleset — no local
+  clone per repo needed.
+
+**Why PRs, not direct writes:** this repo's contract is *"templates ship, not
+patch"*. `sync-templates.sh` never pushes to a default branch or PATCHes repo
+settings — it only proposes a change a human merges, the same propose-then-apply
+posture as the label sync.
+
+### Codex coverage report
+
+Every run (and `--check-codex` on its own) prints whether the
+`chatgpt-codex-connector` GitHub App is installed org-wide, then a manual
+checklist for the per-repo Codex **environment** bootstrap. That environment
+setup lives in Codex's own backend (triggered by the first `@codex review` on a
+repo) and is **not** detectable or scriptable via `gh` — hence detect-and-report
+only. See [`docs/decisions/0001-repo-bootstrap-strategy.md`](../docs/decisions/0001-repo-bootstrap-strategy.md).
+
+### Labels prerequisite
+
+The templates reference the `bug`, `enhancement`, and `needs-triage` labels in
+their `labels:` field. ⚠️ These are GitHub defaults that are **not** in
+`labels.json` and are removed by `sync-labels.sh --delete-extra` — and the org
+taxonomy uses `status: needs-triage`, not bare `needs-triage`. Aligning the
+template `labels:` with the canonical taxonomy is tracked as a follow-up on
+Jigen-lab/ops#32; until then, ensure these labels exist on target repos if you
+want them auto-applied.
 
 ---
 

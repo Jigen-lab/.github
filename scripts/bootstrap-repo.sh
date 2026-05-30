@@ -22,6 +22,8 @@
 #       - .gitignore (downloaded from github/gitignore for the chosen language)
 #       - .github/dependabot.yml (from scripts/dependabot-templates/)
 #       - .github/workflows/ai-closure-summary.yml (from scripts/workflow-templates/)
+#       - .github/ISSUE_TEMPLATE/*.yml + .github/PULL_REQUEST_TEMPLATE.md
+#         (from this repo's own .github/ — the org source of truth)
 #       - LICENSE (MIT — change in template if needed)
 #   5. Creates standard labels from scripts/labels.json
 #
@@ -44,6 +46,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATES_DIR="${SCRIPT_DIR}/dependabot-templates"
 WORKFLOW_TEMPLATES_DIR="${SCRIPT_DIR}/workflow-templates"
 LABELS_FILE="${SCRIPT_DIR}/labels.json"
+# Issue/PR templates are NOT duplicated under scripts/ — they are copied
+# straight from this repo's own .github/, which is the org source of truth
+# (and the same files sync-templates.sh rolls out to existing repos).
+ISSUE_TEMPLATE_SRC_DIR="${SCRIPT_DIR}/../.github/ISSUE_TEMPLATE"
+PR_TEMPLATE_SRC="${SCRIPT_DIR}/../.github/PULL_REQUEST_TEMPLATE.md"
 
 # ---------- Helpers ----------
 die()  { echo "ERROR: $*" >&2; exit 1; }
@@ -85,6 +92,8 @@ done
 [[ ! "$LANG" =~ ^(ts|py|cs|mix)$ ]] && die "--lang must be one of: ts, py, cs, mix"
 [[ ! -f "$LABELS_FILE" ]] && die "Labels file not found: $LABELS_FILE"
 [[ ! -f "${TEMPLATES_DIR}/${LANG}.yml" ]] && die "Dependabot template not found: ${TEMPLATES_DIR}/${LANG}.yml"
+[[ ! -d "$ISSUE_TEMPLATE_SRC_DIR" ]] && die "Issue template source dir not found: $ISSUE_TEMPLATE_SRC_DIR"
+[[ ! -f "$PR_TEMPLATE_SRC" ]] && die "PR template source not found: $PR_TEMPLATE_SRC"
 
 command -v gh >/dev/null   || die "gh CLI not found"
 command -v git >/dev/null  || die "git not found"
@@ -184,6 +193,16 @@ mkdir -p .github/workflows
 cp "${WORKFLOW_TEMPLATES_DIR}/ai-closure-summary.yml" .github/workflows/ai-closure-summary.yml
 log ".github/workflows/ai-closure-summary.yml (AI Stage 5)"
 
+# Issue & PR templates — copied from the org source of truth so the new repo
+# is self-contained instead of relying on the implicit org-wide fallback from
+# the .github repo. Same files sync-templates.sh rolls out to existing repos.
+mkdir -p .github/ISSUE_TEMPLATE
+cp "${ISSUE_TEMPLATE_SRC_DIR}/bug_report.yml"     .github/ISSUE_TEMPLATE/bug_report.yml
+cp "${ISSUE_TEMPLATE_SRC_DIR}/feature_request.yml" .github/ISSUE_TEMPLATE/feature_request.yml
+cp "${ISSUE_TEMPLATE_SRC_DIR}/config.yml"          .github/ISSUE_TEMPLATE/config.yml
+cp "${PR_TEMPLATE_SRC}"                            .github/PULL_REQUEST_TEMPLATE.md
+log ".github/ISSUE_TEMPLATE/{bug_report,feature_request,config}.yml + PULL_REQUEST_TEMPLATE.md"
+
 # LICENSE — proprietary by default (private repos), MIT only if --public
 if [[ "$VISIBILITY" == "public" ]]; then
   cat > LICENSE <<EOF
@@ -251,7 +270,8 @@ Initial scaffold via scripts/bootstrap-repo.sh:
 - README, LICENSE (MIT)
 - .gitignore (${LANG})
 - .github/dependabot.yml (${LANG} template)
-- .github/workflows/ai-closure-summary.yml (AI Stage 5)' >/dev/null"
+- .github/workflows/ai-closure-summary.yml (AI Stage 5)
+- .github/ISSUE_TEMPLATE/*.yml + .github/PULL_REQUEST_TEMPLATE.md' >/dev/null"
 run "git push -u origin main"
 
 # ---------- 4. Grant team access ----------

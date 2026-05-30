@@ -107,24 +107,31 @@ REPOS=("${FILTERED[@]}")
 [[ ${#REPOS[@]} -eq 0 ]] && die "No target repos after filtering"
 
 # ---------- Codex coverage report ----------
+# Returns non-zero only when App coverage could not be determined (so a
+# --check-codex run in CI fails loudly rather than looking like full coverage).
 codex_report() {
   step "Codex (${CODEX_APP_SLUG}) coverage report"
-  local selection
-  selection=$(gh api "orgs/${ORG}/installations" \
-    --jq ".installations[] | select(.app_slug==\"${CODEX_APP_SLUG}\") | .repository_selection" 2>/dev/null || echo "")
-
-  case "$selection" in
-    all)
-      log "✓ App installed org-wide (repository_selection: all) — every repo is covered at the App level." ;;
-    selected)
-      log "⚠ App installed with repository_selection: selected — confirm each target repo is in the selected set:"
-      log "    https://github.com/organizations/${ORG}/settings/installations" ;;
-    "")
-      log "✗ Could not read the Codex App installation (needs admin:org, or the App is not installed)."
-      log "    Install: https://github.com/apps/${CODEX_APP_SLUG}" ;;
-    *)
-      log "? Unexpected repository_selection: '${selection}'" ;;
-  esac
+  local installs selection rc=0
+  # Probe the installations endpoint first so we can tell "no admin:org / API
+  # error" apart from "App genuinely not installed".
+  if ! installs=$(gh api "orgs/${ORG}/installations" --jq '.installations[].app_slug' 2>&1); then
+    log "✗ Could not read org installations (likely missing the admin:org scope)."
+    log "    Refresh with: gh auth refresh -s admin:org   then re-run --check-codex"
+    rc=1
+  elif ! grep -qxF "$CODEX_APP_SLUG" <<<"$installs"; then
+    log "✗ The ${CODEX_APP_SLUG} App is NOT installed on ${ORG}."
+    log "    Install: https://github.com/apps/${CODEX_APP_SLUG}"
+    rc=1
+  else
+    selection=$(gh api "orgs/${ORG}/installations" \
+      --jq ".installations[] | select(.app_slug==\"${CODEX_APP_SLUG}\") | .repository_selection" 2>/dev/null)
+    case "$selection" in
+      all)      log "✓ App installed org-wide (repository_selection: all) — every repo is covered at the App level." ;;
+      selected) log "⚠ App installed with repository_selection: selected — confirm each target repo is in the selected set:"
+                log "    https://github.com/organizations/${ORG}/settings/installations" ;;
+      *)        log "? Unexpected repository_selection: '${selection}'"; rc=1 ;;
+    esac
+  fi
 
   echo ""
   log "Per-repo Codex ENVIRONMENT bootstrap — manual, not detectable via gh:"
@@ -132,11 +139,12 @@ codex_report() {
   for r in "${REPOS[@]}"; do
     log "  - [ ] ${ORG}/${r}"
   done
+  return "$rc"
 }
 
 if [[ "$CHECK_CODEX_ONLY" == "true" ]]; then
-  codex_report
-  exit 0
+  codex_report   # propagate its exit code so CI can key off it
+  exit $?
 fi
 
 # ---------- Preview + confirm ----------
@@ -155,14 +163,22 @@ echo ""
 
 if [[ "$DRY_RUN" != "true" ]]; then
   read -r -p "Proceed? [y/N] " confirm
-  [[ "$confirm" =~ ^[yY]$ ]] || { echo "Aborted."; exit 0; }
+  [[ "$confirm" =~ ^[yY]([eE][sS])?$ ]] || { echo "Aborted."; exit 0; }
 fi
 
 # ---------- Helpers ----------
-# Remote blob SHA of <path> on <repo>@<ref>, or empty if the file is absent.
+# Echo the blob SHA of <path> on <repo>@<ref>; empty output means the file is
+# absent (HTTP 404 — an expected, benign case). Returns NON-ZERO on a real API
+# error (rate-limit, auth, 5xx, network) so the caller can bail on the repo
+# instead of mistaking an error for "file differs" / "file absent".
 remote_blob_sha() {
-  local repo="$1" path="$2" ref="$3"
-  gh api "repos/${ORG}/${repo}/contents/${path}?ref=${ref}" --jq '.sha' 2>/dev/null || true
+  local repo="$1" path="$2" ref="$3" out
+  if out=$(gh api "repos/${ORG}/${repo}/contents/${path}?ref=${ref}" --jq '.sha' 2>&1); then
+    echo "$out"; return 0
+  fi
+  # gh exited non-zero: a genuine 404 is "absent"; anything else is a real error.
+  grep -qiE 'not found|HTTP 404' <<<"$out" && { echo ""; return 0; }
+  return 1
 }
 
 # PUT a file onto the working branch (create or update).
@@ -221,15 +237,20 @@ sync_repo() {
     || { log "  (skipped: cannot read repo — does it exist / have access?)"; return; }
   [[ -z "$default_branch" || "$default_branch" == "null" ]] && { log "  (skipped: no default branch — empty repo?)"; return; }
 
-  # Decide which files are out of date.
+  # Decide which files are out of date. --no-filters keeps the local hash in
+  # terms of raw bytes (the same bytes put_file base64-encodes), so a future
+  # .gitattributes text/CRLF rule can't cause a perpetual "out of date" loop.
   local pair path src local_sha remote_sha
-  local -a need_paths=() need_srcs=() need_remote_shas=()
+  local -a need_paths=() need_srcs=()
   for pair in "${TEMPLATE_MAP[@]}"; do
     path="${pair%%:*}"; src="${pair#*:}"
-    local_sha=$(git hash-object "$src")
-    remote_sha=$(remote_blob_sha "$repo" "$path" "$default_branch")
+    local_sha=$(git hash-object --no-filters "$src")
+    if ! remote_sha=$(remote_blob_sha "$repo" "$path" "$default_branch"); then
+      log "  ! API error reading ${path}@${default_branch} — skipping repo (state unknown)"
+      return
+    fi
     if [[ "$local_sha" != "$remote_sha" ]]; then
-      need_paths+=("$path"); need_srcs+=("$src"); need_remote_shas+=("$remote_sha")
+      need_paths+=("$path"); need_srcs+=("$src")
     fi
   done
 
@@ -247,7 +268,9 @@ sync_repo() {
 
   # Ensure the working branch exists (create from default head, or reuse).
   local head_sha
-  head_sha=$(gh api "repos/${ORG}/${repo}/git/ref/heads/${default_branch}" --jq '.object.sha')
+  head_sha=$(gh api "repos/${ORG}/${repo}/git/ref/heads/${default_branch}" --jq '.object.sha' 2>/dev/null) \
+    || { log "  ! could not read head of ${default_branch} — skipping repo"; return; }
+  [[ -z "$head_sha" || "$head_sha" == "null" ]] && { log "  ! empty head sha for ${default_branch} — skipping repo"; return; }
   if gh api "repos/${ORG}/${repo}/git/ref/heads/${PR_BRANCH}" >/dev/null 2>&1; then
     log "  branch ${PR_BRANCH} already exists — refreshing files on it"
   else
@@ -257,27 +280,45 @@ sync_repo() {
     log "  created branch ${PR_BRANCH}"
   fi
 
-  # Write each out-of-date file onto the branch.
-  local i
+  # Write each out-of-date file onto the branch. Track failures so a partial
+  # write never produces a PR that looks complete (a half-written PR reads as
+  # success otherwise).
+  local i branch_sha local_sha write_failures=0
   for i in "${!need_paths[@]}"; do
     # Re-resolve the sha on the working branch (may differ from default if the
     # branch pre-existed with partial content).
-    local branch_sha
-    branch_sha=$(remote_blob_sha "$repo" "${need_paths[$i]}" "${PR_BRANCH}")
+    if ! branch_sha=$(remote_blob_sha "$repo" "${need_paths[$i]}" "${PR_BRANCH}"); then
+      log "  ! API error reading ${need_paths[$i]}@${PR_BRANCH}"
+      write_failures=$((write_failures + 1)); continue
+    fi
+    # Skip the PUT when the branch already carries identical bytes (avoids a
+    # GitHub 422 "no changes" that would otherwise log as a spurious failure).
+    local_sha=$(git hash-object --no-filters "${need_srcs[$i]}")
+    if [[ "$branch_sha" == "$local_sha" ]]; then
+      log "  = ${need_paths[$i]} (already current on branch)"; continue
+    fi
     if put_file "$repo" "${need_paths[$i]}" "${need_srcs[$i]}" "$branch_sha"; then
       log "  ↑ ${need_paths[$i]}"
     else
       log "  ! failed to write ${need_paths[$i]}"
+      write_failures=$((write_failures + 1))
     fi
   done
 
-  # Open the PR if one isn't already open for this branch.
-  local existing_pr
-  existing_pr=$(gh api "repos/${ORG}/${repo}/pulls?head=${ORG}:${PR_BRANCH}&state=open" --jq '.[0].html_url' 2>/dev/null || true)
-  if [[ -n "$existing_pr" && "$existing_pr" != "null" ]]; then
-    log "  ↻ PR already open: ${existing_pr} (files refreshed)"
-    return
+  if [[ "$write_failures" -gt 0 ]]; then
+    log "  ! ${write_failures} file(s) failed to write — NOT opening PR (branch left for inspection)"
+    return 1
   fi
+
+  # Don't open (or re-open) a PR if one already exists for this branch — check
+  # ALL states so a deliberately-closed PR is not resurrected on a re-run.
+  local existing_state existing_url
+  read -r existing_state existing_url < <(gh api "repos/${ORG}/${repo}/pulls?head=${ORG}:${PR_BRANCH}&state=all" \
+    --jq '.[0] | "\(.state // "") \(.html_url // "")"' 2>/dev/null || echo "")
+  case "$existing_state" in
+    open)   log "  ↻ PR already open: ${existing_url} (files refreshed)"; return ;;
+    closed) log "  ⤫ a previous PR on ${PR_BRANCH} was closed unmerged: ${existing_url} — not re-opening (reopen manually if intended)"; return ;;
+  esac
 
   local url
   if url=$(gh api -X POST "repos/${ORG}/${repo}/pulls" \
@@ -285,8 +326,10 @@ sync_repo() {
             -f head="${PR_BRANCH}" \
             -f base="${default_branch}" \
             -f body="$(pr_body)" \
-            --jq '.html_url' 2>/dev/null); then
+            --jq '.html_url' 2>&1); then
     log "  ✓ PR opened: ${url}"
+  elif grep -qiE 'already exist' <<<"$url"; then
+    log "  ↻ PR already exists for ${PR_BRANCH} (files refreshed)"
   else
     log "  ! failed to open PR (branch pushed; open manually if needed)"
   fi
@@ -297,8 +340,11 @@ for repo in "${REPOS[@]}"; do
 done
 
 # ---------- Codex report (always, at the end) ----------
+# Informational here — an undeterminable Codex state must not fail a rollout
+# that already opened its PRs, so its exit code is swallowed (use --check-codex
+# for the exit-code-bearing variant).
 echo ""
-codex_report
+codex_report || true
 
 echo ""
 echo "✅ Done."

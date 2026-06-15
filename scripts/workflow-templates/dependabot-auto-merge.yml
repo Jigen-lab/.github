@@ -1,0 +1,24 @@
+name: Dependabot auto-merge
+
+# Thin caller for the reusable workflow that arms native auto-merge on
+# Dependabot PRs within the per-ecosystem allow-list (semver-minor + patch
+# for npm_and_yarn / github_actions; patch-only for pip / docker / others).
+# Anything outside the allow-list (majors, loose-semver minors) gets a
+# `status: needs-info` label and is left for a human to review.
+#
+# Requires (configured at bootstrap):
+#   - Repo setting `allow_auto_merge=true` (gh api -X PATCH repos/<>/<>)
+#   - Repo setting `delete_branch_on_merge=true` (cleanup after auto-merge)
+#   - Org Actions setting "Allow GitHub Actions to create and approve pull requests"
+#
+# Full policy: https://github.com/Jigen-lab/ops/blob/main/docs/policies/dependency-updates.md
+
+on: pull_request
+
+jobs:
+  auto-merge:
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: Jigen-lab/github-workflows/.github/workflows/dependabot-auto-merge.yml@main

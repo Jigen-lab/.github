@@ -184,6 +184,14 @@ mkdir -p .github/workflows
 cp "${WORKFLOW_TEMPLATES_DIR}/ai-closure-summary.yml" .github/workflows/ai-closure-summary.yml
 log ".github/workflows/ai-closure-summary.yml (AI Stage 5)"
 
+# .github/workflows/dependabot-auto-merge.yml — thin caller for the reusable
+# in Jigen-lab/github-workflows. Arms native auto-merge on Dependabot PRs
+# inside the per-ecosystem allow-list (npm/actions: minor+patch; pip/docker:
+# patch only). Out-of-list updates get `status: needs-info` for a human.
+# Requires `allow_auto_merge=true` on the repo (set in step 5c below).
+cp "${WORKFLOW_TEMPLATES_DIR}/dependabot-auto-merge.yml" .github/workflows/dependabot-auto-merge.yml
+log ".github/workflows/dependabot-auto-merge.yml (Dependabot auto-merge caller)"
+
 # LICENSE — proprietary by default (private repos), MIT only if --public
 if [[ "$VISIBILITY" == "public" ]]; then
   cat > LICENSE <<EOF
@@ -295,6 +303,25 @@ else
     log "WARN: failed to enable create-PR permission (org-level may be 'read')"
     log "      Fix at org level: Settings → Actions → General → Workflow permissions → Read and write"
     log "      Then retry: gh api -X PUT 'repos/${ORG}/${REPO_NAME}/actions/permissions/workflow' -F default_workflow_permissions=write -F can_approve_pull_request_reviews=true"
+  fi
+fi
+
+# ---------- 5c. Enable auto-merge + delete-branch-on-merge ----------
+# Required by the dependabot-auto-merge caller workflow: `gh pr merge --auto`
+# fails with "Auto merge is not allowed for this repository" when this is off.
+# `delete_branch_on_merge` keeps the repo tidy after Dependabot's auto-merges.
+# Both are unset by default on `gh repo create` — they must be PATCHed in.
+step "Enabling auto-merge + delete-branch-on-merge"
+if [[ "$DRY_RUN" == "true" ]]; then
+  log "[dry-run] gh api -X PATCH 'repos/${ORG}/${REPO_NAME}' -F allow_auto_merge=true -F delete_branch_on_merge=true"
+else
+  if gh api -X PATCH "repos/${ORG}/${REPO_NAME}" \
+      -F allow_auto_merge=true \
+      -F delete_branch_on_merge=true >/dev/null 2>&1; then
+    log "auto-merge + delete-branch-on-merge enabled"
+  else
+    log "WARN: failed to enable auto-merge"
+    log "      Retry: gh api -X PATCH 'repos/${ORG}/${REPO_NAME}' -F allow_auto_merge=true -F delete_branch_on_merge=true"
   fi
 fi
 

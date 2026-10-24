@@ -15,11 +15,13 @@
 
 We do crazy, disruptive stuff with AI. 🚀
 
+Automations, autonomous agents and a few experiments that probably shouldn't work as well as they do. A small team, big ambitions, zero patience for bloatware.
+
 ## Get in touch
 
 Most of our codebase is private by design — we ship results, not gallery pieces. For technical partnerships, contributor access, or commercial inquiries:
 
-- HQ: Via Arboi 25, 6534 S. Vittore (GR), Switzerland
+- Contact: you'll have to figure out how to reach us :)
 
 ## Security
 

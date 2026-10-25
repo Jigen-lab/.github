@@ -6,7 +6,6 @@
 
   <p><strong>Precision aesthetic, applied to Artificial Intelligence.</strong></p>
 
-  <p><sub>Swiss Sagl · Established 2026</sub></p>
 </div>
 
 ---
